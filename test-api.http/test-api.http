@@ -1,0 +1,47 @@
+### 1. Uji SOAP Clearance Status (Sudah Sukses)
+POST http://localhost:8000/soap/sipus
+Content-Type: text/xml
+
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <CheckClearanceStatusRequest>
+            <nim_peminjam>12S24031</nim_peminjam>
+        </CheckClearanceStatusRequest>
+    </soap:Body>
+</soap:Envelope>
+
+### ==========================================
+### LANGKAH 1 REST API: LOGIN UNTUK DAPAT TOKEN
+### ==========================================
+POST http://localhost:8000/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+    "email": "pustakawan@del.ac.id",
+    "password": "password123"
+}
+
+### ==========================================
+### LANGKAH 2 REST API: UJI KATALOG BUKU (PUBLIK)
+### ==========================================
+GET http://localhost:8000/api/v1/bukus?per_page=3
+Accept: application/json
+
+### ==========================================
+### LANGKAH 3 REST API: UJI TAMBAH BUKU BARU (PRIVAT)
+### ==========================================
+Send Request
+POST http://localhost:8000/api/v1/bukus
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer 1|pBuh0uRDYZlo0S4c5ZI20EfMezs8qk6Vj8wVa9K
+
+{
+    "kategori_id": 1,
+    "judul": "Arsitektur Web Services Terdistribusi",
+    "penulis": "Chandro Pardede",
+    "isbn": "978-602-9999-01-1",
+    "stok": 10
+}

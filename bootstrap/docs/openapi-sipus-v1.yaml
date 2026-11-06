@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: SIM-Del Perpustakaan (SIPUS-Del) RESTful Web API
+  version: 1.0.0
+  description: >
+    Kontrak resmi layanan REST API Sistem Informasi Perpustakaan Kampus Del (Minggu 9 PPW).
+    Menerapkan Richardson Maturity Model Level 3 (HATEOAS), RFC 7807 Problem Details,
+    serta otentikasi Stateless Bearer Token Sanctum.
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Masukkan access_token hasil login dari endpoint POST /auth/login
+
+  schemas:
+    BukuInput:
+      type: object
+      required: [kategori_id, judul, penulis, isbn, stok]
+      properties:
+        kategori_id: { type: integer, example: 1 }
+        judul: { type: string, example: "Pemrograman Web Modern" }
+        penulis: { type: string, example: "Chandro Pardede" }
+        isbn: { type: string, example: "978-602-1234-56-7" }
+        stok: { type: integer, minimum: 0, example: 10 }
+
+    PeminjamanInput:
+      type: object
+      required: [buku_id, nim_peminjam, nama_peminjam]
+      properties:
+        buku_id: { type: integer, example: 1 }
+        nim_peminjam: { type: string, example: "12S24031" }
+        nama_peminjam: { type: string, example: "Amelia Renata Lumbanbatu" }
+
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string, example: "http://localhost:8000/docs/errors/validation-failed" }
+        title: { type: string, example: "Unprocessable Content" }
+        status: { type: integer, example: 422 }
+        detail: { type: string, example: "Atribut input tidak memenuhi syarat validasi." }
+        instance: { type: string, example: "/api/v1/bukus" }
+        errors: { type: object }
+
+paths:
+  /auth/login:
+    post:
+      summary: Memeriksa kredensial pustakawan & menerbitkan Bearer Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, example: "pustakawan@del.ac.id" }
+                password: { type: string, example: "password123" }
+      responses:
+        '200':
+          description: Otentikasi berhasil dan mengembalikan access_token
+        '401':
+          description: Kredensial tidak valid (RFC 7807)
+
+  /auth/me:
+    get:
+      summary: Mengambil profil pustakawan pemilik token aktif
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200': { description: Profil pustakawan }
+        '401': { description: Belum login / Token invalid }
+
+  /auth/logout:
+    post:
+      summary: Mencabut (revoke) Bearer Token aktif
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200': { description: Token berhasil dicabut }
+
+  /bukus:
+    get:
+      summary: Daftar katalog buku terpaginasi (Support search, filter kategori, stok & sort)
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: kategori_id, in: query, schema: { type: integer } }
+        - { name: tersedia, in: query, schema: { type: boolean } }
+        - { name: per_page, in: query, schema: { type: integer, default: 5 } }
+      responses:
+        '200': { description: Koleksi buku terpaginasi beserta tautan HATEOAS }
+    post:
+      summary: Menambah buku baru ke perpustakaan
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BukuInput' }
+      responses:
+        '201': { description: Buku dibuat (Beserta Header Location) }
+        '422': { description: Gagal validasi input (RFC 7807) }
+
+  /bukus/{id}:
+    get:
+      summary: Detail satu buku
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Detail buku ditemukan }
+        '404': { description: Buku tidak ditemukan }
+    put:
+      summary: mengganti seluruh representasi atribut buku (Full Replacement)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Seluruh atribut diganti }
+    patch:
+      summary: Mengubah sebagian atribut buku (Partial Update)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Atribut diperbarui sebagian }
+    delete:
+      summary: Menghapus data buku dari sistem
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: Berhasil dihapus tanpa body }
+        '409': { description: Ditolak karena buku sedang dipinjam aktif }
+
+  /bukus/{id}/referensi-eksternal:
+    get:
+      summary: Mengonsumsi OpenLibrary API eksternal berdasarkan ISBN buku
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Metadata dari OpenLibrary berhasil disatukan }
+        '502': { description: API eksternal bermasalah }
+
+  /peminjamans:
+    get:
+      summary: Daftar transaksi peminjaman buku
+      security: [{ BearerAuth: [] }]
+      responses:
+        '200': { description: Transaksi peminjaman }
+    post:
+      summary: Mencatat transaksi peminjaman buku baru (DB Transaction + lockForUpdate)
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PeminjamanInput' }
+      responses:
+        '201': { description: Peminjaman berhasil dicatat, stok berkurang }
+        '409': { description: Mahasiswa masih meminjam buku yang sama }
+        '422': { description: Stok buku habis }
+
+  /peminjamans/{id}/kembalikan:
+    patch:
+      summary: Mengembalikan buku pinjaman (DB Transaction + lockForUpdate)
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Buku berhasil dikembalikan, stok bertambah }
+        '409': { description: Buku sudah dikembalikan sebelumnya }

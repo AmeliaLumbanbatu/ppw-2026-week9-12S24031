@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Soap\LibrarySoapController;
 
 // Redirect halaman utama ke halaman login
 Route::get('/', function () {
@@ -16,6 +17,8 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/soap/sipus.wsdl', [LibrarySoapController::class, 'wsdl']);
+Route::post('/soap/sipus', [LibrarySoapController::class, 'handle']);
 
 // Route Terproteksi (Hanya bisa diakses jika Pustakawan SUDAH login)
 Route::middleware(['auth'])->group(function () {
