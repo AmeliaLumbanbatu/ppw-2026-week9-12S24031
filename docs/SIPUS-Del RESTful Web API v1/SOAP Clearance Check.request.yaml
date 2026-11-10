@@ -1,0 +1,17 @@
+$kind: http-request
+url: http://localhost:8000/soap/sipus
+method: POST
+headers:
+  Content-Type: text/xml
+body:
+  type: text
+  content: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+        <soap:Body>
+            <CheckClearanceStatusRequest>
+                <nim_peminjam>12S24031</nim_peminjam>
+            </CheckClearanceStatusRequest>
+        </soap:Body>
+    </soap:Envelope>
+order: 1000

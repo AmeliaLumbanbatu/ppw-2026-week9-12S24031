@@ -1,0 +1,8 @@
+$kind: http-request
+url: http://localhost:8000/api/v1/bukus?per_page=3
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  per_page: "3"
+order: 3000
