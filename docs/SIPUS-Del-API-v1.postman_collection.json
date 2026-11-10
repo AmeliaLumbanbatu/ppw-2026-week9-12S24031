@@ -1,0 +1,45 @@
+{
+	"info": {
+		"_postman_id": "sipus-del-api-v1-collection",
+		"name": "SIPUS-Del RESTful Web API v1",
+		"description": "Koleksi Pengujian REST API Provider & Consumer SIPUS-Del (Minggu 9)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "SOAP Clearance Check",
+			"request": {
+				"method": "POST",
+				"header": [{ "key": "Content-Type", "value": "text/xml" }],
+				"body": {
+					"mode": "raw",
+					"raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <CheckClearanceStatusRequest>\n            <nim_peminjam>12S24031</nim_peminjam>\n        </CheckClearanceStatusRequest>\n    </soap:Body>\n</soap:Envelope>"
+				},
+				"url": { "raw": "http://localhost:8000/soap/sipus", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["soap", "sipus"] }
+			}
+		},
+		{
+			"name": "Auth - Login Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{ "key": "Content-Type", "value": "application/json" },
+					{ "key": "Accept", "value": "application/json" }
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"pustakawan@del.ac.id\",\n    \"password\": \"password123\"\n}"
+				},
+				"url": { "raw": "http://localhost:8000/api/v1/auth/login", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "auth", "login"] }
+			}
+		},
+		{
+			"name": "Buku - GET Katalog Terpaginasi & HATEOAS",
+			"request": {
+				"method": "GET",
+				"header": [{ "key": "Accept", "value": "application/json" }],
+				"url": { "raw": "http://localhost:8000/api/v1/bukus?per_page=3", "protocol": "http", "host": ["localhost"], "port": "8000", "path": ["api", "v1", "bukus"], "query": [{ "key": "per_page", "value": "3" }] }
+			}
+		}
+	]
+}

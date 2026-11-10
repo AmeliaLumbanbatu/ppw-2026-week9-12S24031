@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SoapController;
 
 // Redirect halaman utama ke halaman login
 Route::get('/', function () {
@@ -17,7 +18,7 @@ Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Route Terproteksi (Hanya bisa diakses jika Pustakawan SUDAH login)
+// Route Terproteksi (Hanya bisa diakses jika Pustakawan SUDUH login)
 Route::middleware(['auth'])->group(function () {
     Route::resource('buku', BukuController::class);
     Route::resource('kategori', KategoriController::class);
@@ -27,3 +28,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
 });
+
+// Route Layanan SOAP (Tugas Minggu 9)
+Route::get('/soap/sipus.wsdl', [SoapController::class, 'wsdl']);
+Route::post('/soap/sipus', [SoapController::class, 'handle']);

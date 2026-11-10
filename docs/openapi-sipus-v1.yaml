@@ -1,0 +1,44 @@
+openapi: 3.0.3
+info:
+  title: SIM-Del Perpustakaan (SIPUS-Del) RESTful Web API
+  version: 1.0.0
+  description: >
+    Kontrak resmi layanan REST API Sistem Informasi Perpustakaan Kampus Del (Minggu 9 PPW).
+    Menerapkan Richardson Maturity Model Level 3 (HATEOAS), RFC 7807 Problem Details,
+    serta otentikasi Stateless Bearer Token Sanctum.
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Masukkan access_token hasil login dari endpoint POST /auth/login
+
+paths:
+  /auth/login:
+    post:
+      summary: Memeriksa kredensial pustakawan & menerbitkan Bearer Token
+      responses:
+        '200': { description: Login Berhasil }
+        '401': { description: Kredensial tidak valid }
+
+  /bukus:
+    get:
+      summary: Daftar katalog buku terpaginasi beserta tautan HATEOAS
+      responses:
+        '200': { description: Berhasil }
+    post:
+      summary: Menambah buku baru
+      security: [{ BearerAuth: [] }]
+      responses:
+        '201': { description: Created }
+
+  /peminjamans:
+    post:
+      summary: Meminjam buku (ACID Transaction)
+      security: [{ BearerAuth: [] }]
+      responses:
+        '201': { description: Created }
