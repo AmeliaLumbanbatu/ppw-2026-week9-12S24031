@@ -1,4 +1,4 @@
-# Tugas Mandiri Praktikum PPW Week 6 - Pembangunan Sistem Informasi Perpustakaan Kampus Del (SIPUS-Del)
+# Tugas Mandiri Praktikum PPW Week 6 - week 9 - Pembangunan Sistem Informasi Perpustakaan Kampus Del (SIPUS-Del)
 
 Repositori ini berisi pengerjaan Tugas Mandiri Praktikum **Pemrograman dan Pengujian Aplikasi Web (PPW)** Minggu 06, Program Studi S1 Sistem Informasi - Institut Teknologi Del.
 
